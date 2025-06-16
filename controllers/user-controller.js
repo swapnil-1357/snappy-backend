@@ -1,6 +1,7 @@
 const { z } = require('zod')
 const UserModel = require('../model/User')
 const { usernameValidation } = require('../validators/checkUsername')
+const UserStoriesModel = require('../model/Stories')
 
 
 const UsernameQuerySchema = z.object({
@@ -22,7 +23,7 @@ const checkUsernameUnique = async (req, res) => {
         }
 
         const { username } = result.data
-        // console.log('check in mongo', username)
+        // // console.log('check in mongo', username)
 
         const user = await UserModel.findOne({ username })
 
@@ -38,7 +39,7 @@ const checkUsernameUnique = async (req, res) => {
         })
 
     } catch (error) {
-        console.log(error)
+        // console.log(error)
 
         return res.status(500).json({
             success: false,
@@ -75,11 +76,12 @@ const getUserByUsername = async (req, res) => {
 
 const editUser = async (req, res) => {
     try {
-        const { username, name, about, avatarUrl } = req.body
+        const { username, name, about, avatar } = req.body
+        // // console.log(username, name, about, avatar)
 
         const updatedUser = await UserModel.findOneAndUpdate(
             { username },
-            { name, about, avatarUrl },
+            { name, about, avatar },
             { new: true }
         )
 
@@ -89,6 +91,14 @@ const editUser = async (req, res) => {
                 message: 'User not found',
             })
         }
+
+        const storyUser = await UserStoriesModel.findOneAndUpdate(
+            { username },
+            { name, avatar },
+            { new: true }
+        )
+
+        // await storyUser.save()
 
         return res.status(200).json({
             success: true,
@@ -106,7 +116,7 @@ const editUser = async (req, res) => {
 
 const saveUserinMongo = async (req, res) => {
     try {
-        const { name, username, email, isVerified } = req.body
+        const { name, username, email, isVerified, avatar } = req.body
         const existingUserVerifiedByUsername = await UserModel.findOne({ username })
 
 
@@ -137,12 +147,21 @@ const saveUserinMongo = async (req, res) => {
         const newUser = new UserModel({
             name,
             username,
+            avatar,
             email,
             isVerified,
             posts: []
         })
 
+        const newUserStory = new UserStoriesModel({
+            name,
+            username,
+            stories: [],
+            avatar
+        })
+
         await newUser.save()
+        await newUserStory.save()
 
         return res.status(201).json({
             success: true,
@@ -183,4 +202,37 @@ const getUserbyEmail = async (req, res) => {
     }
 }
 
-module.exports = { getUserByUsername, editUser, checkUsernameUnique, saveUserinMongo, getUserbyEmail }
+const getUserAvatar = async (req, res) => {
+    try {
+        const { username } = req.query
+        const user = await UserModel.findOne({ username })
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            })
+        }
+
+        if (!user.avatar) {
+            return res.status(200).json({
+                success: true,
+                message: 'User found',
+                avatar: ''
+            })
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'User found',
+            avatar: user.avatar
+        })
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: 'Something went wrong'
+        })
+    }
+}
+
+module.exports = { getUserAvatar, getUserByUsername, editUser, checkUsernameUnique, saveUserinMongo, getUserbyEmail }

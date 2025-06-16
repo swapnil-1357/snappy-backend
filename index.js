@@ -6,6 +6,8 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const db = require('./db/conn')
 const cors = require('cors')
+const startCronJobs = require('./utils/cronjobs')
+
 
 const app = express()
 
@@ -20,16 +22,22 @@ const corsOptions = {
 
 app.use(cors(corsOptions))
 
-app.use(cors())
+// app.use(cors())
 app.use(express.json())
 app.use(bodyParser.urlencoded({extended: true}))
 
 const userRouter = require('./router/user-router')
 const postsRouter = require('./router/posts-router')
+const storyRouter = require('./router/stories-router')
 
 
 app.use('/api/post', postsRouter)
 app.use('/api/user', userRouter)
+app.use('/api/story', storyRouter)
+
+// cron jobs started here
+startCronJobs()
+
 
 
 db().then(() => {

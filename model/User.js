@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const {Schema} = require('mongoose')
+const { Schema } = require('mongoose')
 
 const CommentSchema = new Schema({
     commentId: {
@@ -22,26 +22,41 @@ const CommentSchema = new Schema({
 
 
 const PostSchema = new Schema({
-    postid: { 
-        type: String, 
-        required: true 
+    postid: {
+        type: String,
+        required: true
     },
-    caption: { 
-        type: String, 
-        required: true 
+    caption: {
+        type: String,
+        default: '',
     },
-    imageUrl: { 
-        type: String, 
-        required: true 
+    imageUrl: {
+        type: String,
+        required: true
     },
-    timestamp: { 
-        type: Date, 
-        default: Date.now 
+    timestamp: {
+        type: Date,
+        default: Date.now
     },
     comments: [CommentSchema],
     likes: {
         type: [String],
         default: []
+    }
+})
+
+const StorySchema = new Schema({
+    id: {
+        type: String,
+        required: true
+    },
+    url: {
+        type: String,
+        required: true
+    },
+    timestamp: {
+        type: Date,
+        default: Date.now,
     }
 })
 
@@ -53,6 +68,10 @@ const UserSchema = new Schema({
     username: {
         type: String,
         trim: true,
+    },
+    avatar: {
+        type: String,
+        default: 'https://res.cloudinary.com/dgxeg3sju/image/upload/v1737842141/user-icon_y3afda.avif',
     },
     about: {
         type: String,
@@ -68,7 +87,8 @@ const UserSchema = new Schema({
         type: Boolean,
         required: [true, 'Verification is required'],
     },
-    posts: [PostSchema]
+    posts: [PostSchema],
+    // stories: [StorySchema]
 })
 
 

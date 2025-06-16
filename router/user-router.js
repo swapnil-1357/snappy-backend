@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 
-const {checkUsernameUnique, editUser, getUserByUsername, saveUserinMongo, getUserbyEmail} = require('../controllers/user-controller')
+const { checkUsernameUnique, getUserAvatar, editUser, getUserByUsername, saveUserinMongo, getUserbyEmail } = require('../controllers/user-controller')
 
 router
     .route('/check-username-unique')
@@ -22,5 +22,9 @@ router
 router
     .route('/get-user-by-email')
     .get(getUserbyEmail)
+
+router
+    .route('/get-avatar')
+    .get(getUserAvatar)
 
 module.exports = router

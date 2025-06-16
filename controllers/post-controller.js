@@ -4,6 +4,9 @@ const addPost = async (req, res) => {
     try {
         const { username, postid, imageUrl, caption, timestamp } = req.body
 
+
+        // console.log('add post backend route called')
+
         const user = await UserModel.findOne({ username })
         if (!user) {
             return res.status(404).json({
@@ -12,8 +15,12 @@ const addPost = async (req, res) => {
             })
         }
 
+        // console.log(username, postid, imageUrl, caption, timestamp)
+
         user.posts.push({ postid, caption, imageUrl, timestamp })
         await user.save()
+
+        // console.log('this is user on backend', user)
 
         return res.status(201).json({
             success: true,
@@ -30,7 +37,7 @@ const addPost = async (req, res) => {
 
 const deletePost = async (req, res) => {
     try {
-        const { username, postid, imageUrl, caption, timestamp } = req.body
+        const { username, postid } = req.body
         const user = await UserModel.findOne({ username })
 
         if (!user) {
@@ -133,9 +140,9 @@ const addComment = async (req, res) => {
 const deleteComment = async (req, res) => {
     try {
         const { whose_post, postid, commentId } = req.body
-        console.log(whose_post, postid, commentId)
+        // console.log(whose_post, postid, commentId)
 
-        
+
         const user = await UserModel.findOne({ username: whose_post })
         if (!user) {
             return res.status(404).json({
