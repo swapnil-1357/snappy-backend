@@ -15,7 +15,7 @@ const port = process.env.PORT || 3000
 
 
 const corsOptions = {
-    origin: ['http://localhost:5173','https://localhost:5173'],
+    origin: ['http://localhost:5173', 'https://localhost:5173','https://snappy1357.vercel.app'],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
 }
