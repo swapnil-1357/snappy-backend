@@ -15,13 +15,12 @@ const port = process.env.PORT || 3000
 
 
 const corsOptions = {
-    origin: ['https://snappy1357.vercel.app'],
+    origin: ['http://localhost:5173','https://localhost:5173'],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
 }
 
 app.use(cors(corsOptions))
-
 // app.use(cors())
 app.use(express.json())
 app.use(bodyParser.urlencoded({extended: true}))

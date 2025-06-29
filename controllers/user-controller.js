@@ -77,8 +77,8 @@ const getUserByUsername = async (req, res) => {
 const editUser = async (req, res) => {
     try {
         const { username, name, about, avatar } = req.body
-        // // console.log(username, name, about, avatar)
 
+        // Update user profile
         const updatedUser = await UserModel.findOneAndUpdate(
             { username },
             { name, about, avatar },
@@ -92,13 +92,18 @@ const editUser = async (req, res) => {
             })
         }
 
-        const storyUser = await UserStoriesModel.findOneAndUpdate(
+        // Update all posts in the posts collection for this user
+        await UserModel.updateMany(
+            { username }, // or { user: username } if your field is named 'user'
+            { $set: { user_avatar: avatar } }
+        )
+
+        // Update stories user info
+        await UserStoriesModel.findOneAndUpdate(
             { username },
             { name, avatar },
             { new: true }
         )
-
-        // await storyUser.save()
 
         return res.status(200).json({
             success: true,
@@ -113,7 +118,6 @@ const editUser = async (req, res) => {
         })
     }
 }
-
 const saveUserinMongo = async (req, res) => {
     try {
         const { name, username, email, isVerified, avatar } = req.body
