@@ -26,5 +26,7 @@ router
 router
     .route('/get-avatar')
     .get(getUserAvatar)
-
+router
+    .route('/profile')
+    .get(getUserByUsername)
 module.exports = router
