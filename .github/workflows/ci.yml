@@ -1,7 +1,9 @@
-name: Backend CI
+name: Backend CI + CD
 
 on:
   push:
+    branches:
+      - main
   pull_request:
 
 jobs:
@@ -22,3 +24,14 @@ jobs:
 
       - name: Run tests
         run: npm test
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && success()
+
+    steps:
+      - name: Deploy to Render
+        run: curl "$RENDER_DEPLOY_HOOK"
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
