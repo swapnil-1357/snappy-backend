@@ -9,6 +9,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      MONGO_URI: ${{ secrets.MONGO_URI}} 
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -28,6 +31,7 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -52,6 +56,7 @@ jobs:
     needs: docker-build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
+
     steps:
       - name: Deploy to Render
         run: curl "$RENDER_DEPLOY_HOOK"
