@@ -3,6 +3,11 @@ const router = express.Router()
 
 const { checkUsernameUnique, getUserAvatar, editUser, getUserByUsername, saveUserinMongo, getUserbyEmail } = require('../controllers/user-controller')
 
+router.get('/', (req, res) => {
+    res.json({ message: 'User API is working!' });
+});
+  
+
 router
     .route('/check-username-unique')
     .get(checkUsernameUnique)
