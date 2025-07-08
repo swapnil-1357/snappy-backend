@@ -3,12 +3,12 @@ name: Backend CI + CD
 on:
   push:
     branches:
+      - master  # or main, if your default branch is named 'main'
   pull_request:
 
 jobs:
   test:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -28,7 +28,6 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -53,7 +52,6 @@ jobs:
     needs: docker-build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
-
     steps:
       - name: Deploy to Render
         run: curl "$RENDER_DEPLOY_HOOK"
