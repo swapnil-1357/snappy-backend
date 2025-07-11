@@ -4,6 +4,7 @@ const {
     getNotifications,
     markAllSeen,
     deleteNotification,
+    createNotification,
 } = require('../controllers/notification-controller');
 
 router
@@ -17,5 +18,9 @@ router
 router
     .route('/delete/:id')
     .delete(deleteNotification);
+
+router
+    .route('/create')
+    .post(createNotification);
 
 module.exports = router;
