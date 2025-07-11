@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "node index.js",
+    "dev": "nodemon index.js",
     "test": "cross-env NODE_ENV=test jest --detectOpenHandles"
   },
   "author": "",
