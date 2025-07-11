@@ -131,7 +131,7 @@ const addComment = async (req, res) => {
         if (comment.commentor !== whose_post) {
             const sender = await UserModel.findOne({ username: comment.commentor });
 
-            await NotificationModel.create({
+            const notif = await NotificationModel.create({
                 userId: user._id.toString(),
                 senderId: sender._id.toString(),
                 postId: postid,
@@ -140,6 +140,15 @@ const addComment = async (req, res) => {
                 seen: false,
                 timestamp: new Date(),
             });
+
+            // 🔔 Emit real-time notification
+            const io = req.app.get('io');
+            const connectedUsers = req.app.get('connectedUsers');
+            const socketId = connectedUsers.get(user._id.toString());
+            if (socketId) {
+                io.to(socketId).emit('new_notification', notif);
+            }
+
         }
 
         return res.status(200).json({
@@ -228,13 +237,24 @@ const toggleLike = async (req, res) => {
         if (isNewLike && liker !== whose_post) {
             const sender = await UserModel.findOne({ username: liker });
 
-            await NotificationModel.create({
+            const notif = await NotificationModel.create({
                 userId: user._id.toString(),
                 senderId: sender._id.toString(),
                 postId: postid,
                 type: 'like',
                 message: `${liker} liked your post`,
+                seen: false,
+                timestamp: new Date(),
             });
+
+            // 🔔 Emit real-time notification
+            const io = req.app.get('io');
+            const connectedUsers = req.app.get('connectedUsers');
+            const socketId = connectedUsers.get(user._id.toString());
+            if (socketId) {
+                io.to(socketId).emit('new_notification', notif);
+            }
+
         }
 
         return res.status(200).json({ success: true, message: 'Like toggled successfully' });
