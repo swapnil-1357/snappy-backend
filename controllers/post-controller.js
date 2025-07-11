@@ -1,5 +1,6 @@
 const UserModel = require('../model/User')
 
+const NotificationModel = require('../model/NotificationModel');
 const addPost = async (req, res) => {
     try {
         const { username, postid, imageUrl, caption, timestamp } = req.body
@@ -102,41 +103,59 @@ const getPosts = async (req, res) => {
 
 const addComment = async (req, res) => {
     try {
-        const { whose_post, postid, comment } = req.body
+        const { whose_post, postid, comment } = req.body;
 
-        const user = await UserModel.findOne({ username: whose_post })
+        // Find the user who owns the post
+        const user = await UserModel.findOne({ username: whose_post });
         if (!user) {
             return res.status(404).json({
                 success: false,
-                message: 'User not found'
-            })
+                message: 'User not found',
+            });
         }
 
-        const post = user.posts.find(post => post.postid === postid)
+        // Find the specific post
+        const post = user.posts.find(post => post.postid === postid);
         if (!post) {
             return res.status(404).json({
                 success: false,
-                message: 'Post not found'
-            })
+                message: 'Post not found',
+            });
         }
 
-        post.comments.push(comment)
-        await user.save()
+        // Add the comment to the post
+        post.comments.push(comment);
+        await user.save();
+
+        // ✅ Create notification if commenter is not the post author
+        if (comment.commentor !== whose_post) {
+            const sender = await UserModel.findOne({ username: comment.commentor });
+
+            await NotificationModel.create({
+                userId: user._id.toString(),
+                senderId: sender._id.toString(),
+                postId: postid,
+                type: 'comment',
+                message: `${comment.commentor} commented on your post`,
+                seen: false,
+                timestamp: new Date(),
+            });
+        }
 
         return res.status(200).json({
             success: true,
             message: 'Comment added successfully',
-            post
-        })
+            post,
+        });
 
     } catch (error) {
+        console.error('❌ Error adding comment:', error.message, error.stack);
         return res.status(500).json({
             success: false,
-            message: 'Something went wrong'
-        })
+            message: error.message || 'Something went wrong',
+        });
     }
-}
-
+};
 const deleteComment = async (req, res) => {
     try {
         const { whose_post, postid, commentId } = req.body
@@ -182,55 +201,50 @@ const deleteComment = async (req, res) => {
         })
     }
 }
-
 const toggleLike = async (req, res) => {
     try {
-        const { whose_post, postid, liker } = req.body
+        const { whose_post, postid, liker } = req.body;
 
-        const user = await UserModel.findOne({ username: whose_post })
+        const user = await UserModel.findOne({ username: whose_post });
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: 'User not found'
-            })
-        }
+        const post = user.posts.find(post => post.postid === postid);
+        if (!post) return res.status(404).json({ success: false, message: 'Post not found' });
 
-        const post = user.posts.find(post => post.postid === postid)
+        if (!post.likes) post.likes = [];
 
-        if (!post) {
-            return res.status(404).json({
-                success: false,
-                message: 'Post not found'
-            })
-        }
+        const likeIndex = post.likes.indexOf(liker);
+        const isNewLike = likeIndex === -1;
 
-        if (!post.likes) {
-            post.likes = []
-        }
-
-        const likeIndex = post.likes.indexOf(liker)
-
-        if (likeIndex === -1) {
-            post.likes.push(liker)
+        if (isNewLike) {
+            post.likes.push(liker);
         } else {
-            post.likes.splice(likeIndex, 1)
+            post.likes.splice(likeIndex, 1);
         }
 
-        await user.save()
+        await user.save();
 
-        return res.status(200).json({
-            success: true,
-            message: 'Like toggled successfully'
-        })
+        // 🔔 Create notification only for new like and not if user likes own post
+        if (isNewLike && liker !== whose_post) {
+            const sender = await UserModel.findOne({ username: liker });
 
+            await NotificationModel.create({
+                userId: user._id.toString(),
+                senderId: sender._id.toString(),
+                postId: postid,
+                type: 'like',
+                message: `${liker} liked your post`,
+            });
+        }
+
+        return res.status(200).json({ success: true, message: 'Like toggled successfully' });
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: 'Something went wrong'
-        })
+        console.error('Error in toggleLike:', error);
+        return res.status(500).json({ success: false, message: 'Something went wrong' });
     }
-}
+};
+
+
 
 
 module.exports = { addPost, deletePost, getPosts, addComment, deleteComment, toggleLike }
